@@ -1,0 +1,59 @@
+<?xml version="1.0"?>  
+<project name="GAEUnit" default="dist" basedir=".">
+  <!-- set global properties for this build -->
+  <property name="version" value="gaeunit-1.2.8"/>
+  <property name="build" location="build"/>
+  <property name="gae_export" location="build/${version}"/>
+  <property name="gae_django_export" location="build/${version}_for_django"/>
+  <property name="dist"  location="${gae_export}.zip"/>
+  <property name="dist_django"  location="${gae_django_export}.zip"/>
+
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${build}"/>
+    <mkdir dir="${gae_export}"/>
+    <mkdir dir="${gae_django_export}"/>
+  </target>
+
+  <target name="copy" depends="init">
+    <copy todir="${gae_export}" includeEmptyDirs="false">
+      <fileset dir=".">
+        <exclude name="**/.svn"/>
+        <exclude name="${build}/"/>
+        <exclude name="build.xml"/>
+        <exclude name="test/"/>
+        <exclude name="django_app/"/>
+        <exclude name="**/*.pyc"/>
+      </fileset>
+    </copy>
+  </target>
+
+  <target name="copy-django" depends="init">
+    <copy todir="${gae_django_export}/django_app/gaeunit/" 
+					file="gaeunit.py"/>
+    <copy todir="${gae_django_export}" includeEmptyDirs="false">
+      <fileset dir=".">
+        <include name="django_app/"/>
+        <include name="README.TXT"/>
+        <exclude name="**/.svn"/>
+        <exclude name="**/*.pyc"/>
+      </fileset>
+    </copy>
+  </target>
+
+  <target name="dist" depends="copy, copy-django">
+    <zip destfile="${dist}" basedir="${build}"
+			includes="${version}/**"/>
+    <zip destfile="${dist_django}" basedir="${build}"
+			includes="${version}_for_django/**"/>
+  </target>
+
+  <target name="clean"
+        description="clean up" >
+    <!-- Delete the ${build} and ${dist} directory trees -->
+    <delete dir="${build}"/>
+  </target>
+</project>
+

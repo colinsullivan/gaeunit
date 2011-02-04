@@ -1,0 +1,10 @@
+
+# /
+/nbproject
+
+# /sample_app/
+/sample_app/gaeunit.py
+
+*.git
+*.svn
+*.DS_Store

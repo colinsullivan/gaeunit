@@ -370,7 +370,7 @@ def _create_suite(package_name, test_name, test_dir):
 def _load_default_test_modules(test_dir):
     if not test_dir in sys.path:
         sys.path.append(test_dir)
-    module_names = [mf[0:-3] for mf in os.listdir(test_dir) if mf.endswith(".py")]
+    module_names = [mf[0:-3] for mf in os.listdir(test_dir) if mf.endswith(".py") and mf != '__init__.py']
     return [reload(__import__(name)) for name in module_names]
 
 

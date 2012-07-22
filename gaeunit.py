@@ -282,6 +282,7 @@ class JsonTestResult(unittest.TestResult):
             'total': self.testNumber,
             'errors': self._list(self.errors),
             'failures': self._list(self.failures),
+            'timeTaken': self.timeTaken
             }
 
         stream.write(django.utils.simplejson.dumps(result).replace('},', '},\n'))
@@ -301,10 +302,10 @@ class JsonTestRunner:
     def run(self, test):
         self.result = JsonTestResult()
         self.result.testNumber = test.countTestCases()
-        startTime = time.time()
+        startTime = time.clock()
         test(self.result)
-        stopTime = time.time()
-        timeTaken = stopTime - startTime
+        stopTime = time.clock()
+        self.result.timeTaken = stopTime - startTime
         return self.result
 
 
@@ -451,6 +452,7 @@ _MAIN_PAGE_CONTENT = """
         #version {font-size:87%%; text-align:center;}
         #weblink {font-style:italic; text-align:center; padding-top:7px; padding-bottom:7px}
         #results {padding-top:20px; margin:0pt auto; text-align:center; font-weight:bold}
+        #results tr#details td { width: 25%%; }
         #testindicator {width:750px; height:16px; border-style:solid; border-width:2px 1px 1px 2px; background-color:#f8f8f8;}
         #footerarea {text-align:center; font-size:83%%; padding-top:25px}
         #errorarea {padding-top:25px}
@@ -462,6 +464,7 @@ _MAIN_PAGE_CONTENT = """
         var totalRuns = 0;
         var totalErrors = 0;
         var totalFailures = 0;
+        var totalTime = 0;
 
         function newXmlHttp() {
           try { return new XMLHttpRequest(); } catch(e) {}
@@ -484,12 +487,19 @@ _MAIN_PAGE_CONTENT = """
                 }
                 if (xmlHttp.status == 200) {
                     var result = eval("(" + xmlHttp.responseText + ")");
+
                     totalRuns += parseInt(result.runs);
                     totalErrors += result.errors.length;
                     totalFailures += result.failures.length;
+                    totalTime += result.timeTaken;
+
                     document.getElementById("testran").innerHTML = totalRuns;
                     document.getElementById("testerror").innerHTML = totalErrors;
                     document.getElementById("testfailure").innerHTML = totalFailures;
+
+                    roundedTime = Math.round(totalTime * 1000) / 1000;
+                    document.getElementById("testtime").innerHTML = roundedTime;
+
                     if (totalErrors == 0 && totalFailures == 0) {
                         testSucceed();
                     } else {
@@ -561,11 +571,12 @@ _MAIN_PAGE_CONTENT = """
     </div>
     <div id="resultarea">
         <table id="results"><tbody>
-            <tr><td colspan="3"><div id="testindicator"> </div></td</tr>
-            <tr>
+            <tr><td colspan="4"><div id="testindicator"> </div></td</tr>
+            <tr id="details">
                 <td>Runs: <span id="testran">0</span>/<span id="testtotal">0</span></td>
                 <td>Errors: <span id="testerror">0</span></td>
                 <td>Failures: <span id="testfailure">0</span></td>
+                <td>Time: <span id="testtime">0</span> secs</td>
             </tr>
         </tbody></table>
     </div>
